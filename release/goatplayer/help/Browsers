@@ -1,0 +1,28 @@
+<b>B R O W S E R S
+
+<c>[1·Browser1]
+<c>[2·Browser2]
+
+There are 2 Browsers. Each Browser is used to browse the Music library.
+Use focus-keys 1 or 2 to select a Browser. Otherwise, click on their tab-labels.
+
+When a Browser is selected, Left-section will show its View, while Right-section
+will show its Tabs.
+
+Browser's Tabs:
+->  2 Tabs containing a total of 6 tag-fields.
+->  1 Tab with the Properties of the selected Audiofile.
+->  1 Tab with a treeview of the working directory
+->  ...
+
+There are 6 tag-fields:
+Genres, Artists, Albums, AlbumArtists, Composers, Years.
+Each Browser's fields-tab contains 3 Fields.
+Inside the Field-window, it is possible to activate 1 or more values. The 
+Browser's View will be filled with the audiofiles filtered by the activated 
+values.
+
+In Dirs it is possible to set the working directory for each Browser.
+This must be the Music Library's directory or one of its subdirectories.
+The Browser will show only the audiofiles contained under that directory.
+The second segment of the Display shows details about the selected Browser.

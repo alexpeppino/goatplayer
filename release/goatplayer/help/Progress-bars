@@ -1,0 +1,13 @@
+<b>Progress-bars
+
+There are 2 Progress-bars.
+The one on the left side shows timing infos for the playing Audiofile.
+The other one shows timing infos for the playing List.
+
+Each Progress-bar has 4 values:
+
+2:14 / 5:09  -> time / duration
+(43%)        ->  percentage
+-2:55        ->  remaining time
+
+In the Colors window it is possible to modify the colors for the Progress-bars.

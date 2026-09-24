@@ -1,0 +1,22 @@
+<b>H E L P
+
+<c>[Dialog]
+<c>->  [F1·Help]
+
+Press F1 to open the Help window.
+When the Help window is opened from another window, the help page for that
+window is selected.
+
+Use ArrowUp and ArrowDown to select another help-file.
+Use ArrowLeft and ArrowRight to move between the pages of the help-file
+(Filepages).
+
+<b>Help-files
+
+Help-files are plain text files put in GoatPlayer's 'help' subdirectory.
+Line length is 80 chars. File content is printed 30 lines / page.
+
+A few "tags" are used to set line's colors and fontstyle:
+<b>·  <b> bold
+<i>·  <i> italic
+<c>·  <c> colored

@@ -1,0 +1,27 @@
+<b>T E R M I N O L O G Y
+
+<i>Field or Tag-field
+A Field is a window containing the values for a single audiofile's tag-field 
+(or tag-frame).
+
+<i>Fields-tab
+A Fields-tab is a Browser's tab and contains 3 Fields.
+
+<i>tab-label
+A tab-label is the label printed on top of a Tab.
+
+<i>window-label
+A window-label is the label for windows that are inside a multi-window Tab. It
+is printed on top of the window.
+
+<i>A+, S+, C+
+Alt+, Shift+, Ctrl+
+
+<i>mouse1, mouse3, MW
+Mouse left button, mouse right button, mouse wheel
+
+<i>prev, sel
+Previous, selected
+
+<i>Wsp
+Workspace

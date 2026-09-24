@@ -1,0 +1,18 @@
+<b>E Q U A L I Z E R
+
+<c>[Dialog]
+<c>->  [F3·Equalizer]
+
+Press F3 or click on the tab-label (when the Dialog is open) to select this Tab.
+
+Use ArrowUp and ArrowDown to select an Equalizer-set.
+Use the "Activate sel" command to activate and apply the selected Equalizer-set.
+Use Alt+ArrowUp and Alt+ArrowDown to select a frequency.
+Use Alt+ArrowLeft and Alt+ArrowRight to change the gain's value.
+
+There are 20 Equalizer-sets. Each set has 10 frequencies.
+The first 3 sets are initially flat. The values and names of the others are
+copied from VLC.
+
+(There is a vertical graphical representation of the equalizer-set instead of
+the horizontal one)

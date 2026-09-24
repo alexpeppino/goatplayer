@@ -1,0 +1,33 @@
+<b>S E T T I N G S
+
+<c>[Dialog]
+<c>->  [F2·Settings]
+
+In the Settings-tab there are most of GoatPlayer's settings.
+Use arrowLeft and arrowRight to modify the value of the selected item.
+In some cases a Readline-dialog or a Find-dialog will be used to set the item's
+value. (For some items, all possible values are printed in the status-bar.)
+
+<b>List of all settings
+
+<i>Repeat playlist
+<i>Equalizer
+<i>Progress-bars delay in milliseconds
+
+<i>Open in Browser at ...
+From some windows, it is possible to open the internet browser.
+From the "Genres" window, the selected genre will be searched
+for. From the "Artists" window, the selected artist will be searched for.
+And so on. These settings define which internet sites will be opened when the
+"Open in Browser" command is executed.
+
+<i>Player: select the playing audiofile
+This setting selects the new playing audiofile's line as it changes.
+
+<i>Player: playing-line is blinking
+
+<i>Play only the first N seconds [No/10/20/30]
+This is used to play just the first seconds of each audiofile.
+
+<i>Audio pitch correction [Yes/No]
+When speed is different than 1, this corrects the pitch.

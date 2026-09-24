@@ -1,0 +1,9 @@
+<b>M P V
+
+To play audiofiles, GoatPlayer executes a new Mpv process for each audiofile.
+Communication is done via a Unix socket.
+
+Playlists are managed internally by GoatPlayer.
+
+(This is just a temporary solution. Mpv will always be used as external music
+player, but in a better way.)

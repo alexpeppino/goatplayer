@@ -1,0 +1,14 @@
+<b>T A G  F I E L D S
+
+<c>[1·Browser]         First Browser
+<c>[2·Browser]         Second Browser
+<c>->  [4/6·Fields]    First fields-tab (Genres, Artists, Albums)
+<c>->  [7/9·Fields]    Second fields-tab (AlbumArtists, Composers, Years)
+
+Use 4 to 9 focus-keys to select one field-window for the current Browser.
+Otherwise, click on the tab-labels.
+Each fields-tab contains 3 field-windows. Click inside a field-window to select
+it.
+
+Use arrowUp, arrowDown or mouse1 to select a field-value.
+Use the "Activate sel" command or mouse3 to activate/deactivate a field-value.

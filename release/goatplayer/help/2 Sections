@@ -1,0 +1,120 @@
+<b>S E C T I O N S
+
+The Terminal window is split into Sections.
+(A Dialog is shown sometimes over those sections.)
+
+<c>┌────────────────┬─────────────────┬───────┐
+<c>│  Workspace:    :                 │Command│
+<c>│  Left-section  :  Right-section  │ panel │
+<c>│                :                 │       │
+<c>├────────────────┴─────────────────┤       │
+<c>│  Display                         │       │
+<c>├──────────────────────────────────┤       │
+<c>│  Progess-bars                    │       │
+<c>│  Status-line                     │       │
+<c>└──────────────────────────────────┴───────┘
+
+<b>Workspace
+
+The Workspace contains 2 sections:
+
+<i>1) Left-section
+<c>┌────────────┐┌────────────┐┌──────────┐
+<c>│ 1·Browser1 ││ 2·Browser2 ││ 3·Player │    -> tab-labels
+
+In the Left-section it is possible to select a Workspace. 
+There are 3 Workspaces: Browser1, Browser2 and Player.
+Use focus-keys 1 to 3 to select a Workspace. Otherwise, click on the tab-labels.
+Left-section shows the selected Workspace's view (Browser1's view is called 
+View1; Browser2's view is called View2).
+When the Player Workspace is selected, Left-section shows the Player's window.
+<i>2) Right-section
+<c>│┌────────────┐┌────────────┐┌─
+<c>││ 4/6·Fields ││ 7/9·Fields ││   -> tab-labels (fields-tabs)
+<c>│
+<c>│ 4·Genres                       -> window-label
+
+When a Workspace is selected, Right-section will show the Workspace's Tabs. 
+Some Tabs are multi-window: they contain more than 1 window. In this case,
+window-labels are printed on top of each window. Press the window's focus-key to
+select the window; otherwise, click on the window.
+In the example above, the tab-labels for the fields-tabs are printed; below, a
+window-label is printed.
+
+<b>Other sections
+
+The Display section prints infos about the playing audiofile, the selected 
+Workspace and other things.
+
+The Progress-bars section shows timing infos about the playing audiofile and
+the list.
+
+The Status-line shows the full text of the selected item. It is also used to
+print error messages (they are blinking).
+
+The Command-panel prints the command menu for the selected window. Most of these
+commands are buttons.
+Use the arrow-buttons at the top to change between pages. Otherwise, use
+"Prev command page" and "Next command page" commands.
+The row at the bottom prints infos about the last keyboard or mouse event.
+
+<b>Dialogs
+
+The main Dialog is used to visualize these other windows:
+
+1) Help
+2) Settings
+3) Equalizer
+4) Colors
+5) Report
+
+There are other dialogs:
+·  Find-dialog
+·  Readline-dialog
+
+Readline-dialog is used just to input a line. Find-dialog is more complex. 
+
+<i>Find-dialog
+
+The Find-dialog is used to filter and select one or more items from a list.
+Filtering is made by a textual pattern typed by the user.
+It is possible to select one or more items. To select more items, use mouse3;
+otherwise, use the "Activate item" command.
+
+<b>Selection/activation inside the window
+
+Use arrowUp and arrowDown to select the previous or the next line. Otherwise, 
+click on a line with mouse1.
+
+Mouse3 is mainly used to activate a line: it plays a file in the Player; it 
+activates/deactivates a field-value in a Field; it sets a directory as 
+the working directory in Dirs.
+
+PageUp and pageDown scroll to the previous or the next page. (It is not possible
+to scroll lines.) 
+
+When the last line is selected, arrowDown will select the first line.
+When the first line is selected, arrowUp will select the last line.
+
+The Home key will always select the first line.
+The End key will select the playing audiofile in the Player and the next
+activated value in the Fields.
+
+Browser and Player's views print their items folded. Folding is done in either
+ways: 
+
+<c>  Artist name · Album name
+<c>    audiofile's title (or filename if there is no title)         1  1:23
+or
+<c>  Composer name · Album name
+<c>    audiofile's title (or filename if there is no title)         1  1:23
+
+"1" is the track number, "1:23" is the duration. When duration is 1 hour or
+more, it is printed in this format: "1h23" (1 hour and 23 minutes).
+
+At the bottom of the View is the View's status line:
+
+<c>  2/10 [1h23]
+
+"2" is the item's position in the list, "10" is the number of items.
+"[1h23]" is the duration of the list.
