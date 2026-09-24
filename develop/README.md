@@ -1,1 +1,1 @@
-This is the development (debug) versione of the code.
+This is the development (debug) version of the source code.
