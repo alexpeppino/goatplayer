@@ -1,0 +1,486 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"strings"
+)
+
+func NameOrNil(a iTrace, s string) {
+	if a == nil {
+		trace.Print("%s: nil", s)
+	} else {
+		trace.Print("%s: %s", s, a.GetLongName())
+	}
+}
+
+func (this *vScreen) Dump_o() {
+	// trace.BeginAdd_n(this, "Dump {vScreen}", x__)
+	trace.Print("this.name             %s", this.name)
+	trace.Print("this.isDialog         %v", this.isDialog)
+	trace.Print("this.allSections      %s", GetLongNames(this.allSections))
+	trace.Print("this.activeWindow     %s", GetNilOrName(this.activeWindow))
+	trace.Print("this.allFocusButtonsToLayer")
+	dump.TraceFocusButtons(&this.allFocusButtons)
+	// trace.EndAdd(x__)
+}
+
+func (this *vMainScreen) Dump_o() {
+	trace.BeginAdd_n(this, "Dump_o {vMainScreen}", x__)
+	this.vScreen.Dump_o()
+	trace.Print("this.activeWorkspace  %s", GetNilOrName(this.activeWorkspace))
+	trace.Print("this.allWorkspaces    %s", GetLongNames(this.allWorkspaces))
+	trace.Print("this.mapWorkspaces")
+	TraceNameAndInterfaceFromMap(this.mapWorkspaces)
+	trace.EndAdd(x__)
+}
+
+func (this *vScreen) DumpScreen() {
+	trace.Begin_n(this, "DumpScreen {vScreen}")
+	trace.Print("this.name                  %s", this.name)
+	trace.Print("this.outer                 %s", GetOuterNilOrName(this.outer))
+	trace.Print("this.content               %s", this.content)
+	trace.Print("this.beforeContent         %s", this.beforeContent)
+	trace.Print("this.afterContent          %s", this.afterContent)
+	trace.Print("this.isDialog              %v", this.isDialog)
+	trace.Print("this.allSections      %s", GetLongNames(this.allSections))
+	trace.Print("this.activeWindow     %s", GetNilOrName(this.activeWindow))
+	trace.Print("this.allFocusButtons")
+	dump.TraceFocusButtons(&this.allFocusButtons)
+
+	for i := range this.allSections {
+		se := this.allSections[i]
+		se.DumpSection()
+	}
+	trace.End()
+}
+func CheckOuters() {
+	trace.Print("CheckOuters")
+	for i := range AllMaps.allBasicModels {
+		basic := AllMaps.allBasicModels[i]
+		trace.Print("  %20s, %12p %12p", basic.name, basic, basic.outer)
+	}
+	// trace.Print("  %20s, %12p %12p %12p", Genres.name, &Genres.mBasic, &Genres, Genres.outer)
+}
+func (this *mPlaylist) DumpModel() {
+	trace.Begin_n(this, "DumpModel {mEditor}")
+	this.mBasic.DumpModel()
+	trace.Print("len dbIndexes: %v", len(this.dbIndexes.sl))
+	trace.Print("this.data.activeListname  %v", this.data.activeListname)
+	trace.Print("this.data  %#v", this.data)
+	trace.End()
+}
+
+func (this *cSettings) TraceSettings() {
+	// trace.Print("Set.TraceSettings")
+	for i := range this.allSettings {
+		s := this.allSettings[i]
+		trace.Print("%-40s %s", s.GetDesc(), s.GetValue())
+	}
+	// 	switch s.(type) {
+	// 	case *cSetSt:
+	// 		var ui *cSetSt = s.(*cSetSt)
+	// 		trace.Print("set %2d: %s (%v)", i, ui.values[ui.Pos], ui.values)
+	// 	default:
+	// 		trace.Print("set %2d: invalid type", i)
+	// 	}
+	// }
+}
+func (this *mDirs) DumpModel() {
+	trace.Begin_n(this, "DumpModel {mDirs}")
+	this.mBasic.DumpModel()
+	trace.Print("this.outer                 %s", GetOuterNilOrName(this.outer))
+	trace.Print("this.nMusicFiles           %#v", this.nMusicFiles)
+	trace.Print("this.workingDir            %s", this.workingDir)
+	trace.End()
+}
+
+func (this *maWorkspace) Dump_o(begin bool) {
+	if begin {
+		trace.BeginAdd_n(this, "Dump_o {mWorkspace}", x__)
+	}
+	trace.Print("this.name             %s", this.name)
+	trace.Print("this.pSectionRight    %s", GetNilOrName(this.pRightSection))
+	trace.Print("this.sections         %s", GetLongNames(this.sections))
+	trace.Print("this.focusToModel     %s", this.focusKeys.name)
+	this.focusKeys.TraceItems()
+	if begin {
+		trace.EndAdd(x__)
+	}
+}
+
+func (this *mBrowserWsp) Dump_o() {
+	trace.BeginAdd_n(this, "Dump_o {mBrowserWsp}", x__)
+	this.maWorkspace.Dump_o(false)
+	trace.EndAdd(x__)
+}
+
+func (this *mFilelist) DumpModel() {
+	trace.Begin_n(this, "DumpModel {mEditor}")
+	this.mBasic.DumpModel()
+	trace.Print("len dbIndexes: %v", len(this.dbIndexes.sl))
+	trace.End()
+}
+
+func (this *mFilelist) Trace() {
+	this.mBasic.TraceModelSelAct()
+	trace.Print("container: %s", this.container.name)
+	trace.Print("this.statusLine: %s", this.w.statusLine) //@1
+}
+
+func (this *mContainer) DumpModel() {
+	trace.Begin_n(this, "DumpModel {mContainer}")
+	this.mBasic.DumpModel()
+	trace.Print("this.outer                 %s", GetOuterNilOrName(this.outer))
+	trace.Print("this.filterValues          %#v", this.validValues)
+	trace.Print("this.allValues             %#v", this.allValues)
+	// trace.Print("this.sa1.v                 %#v", this.sa1.v)
+	// trace.Print("this.sa2.v                 %#v", this.sa2.v)
+	trace.End()
+}
+
+func (cDump) TraceAllScreens() {
+	for _, in := range AllMaps.allScreens_in {
+		in.TraceScreen()
+	}
+}
+
+func (cDump) DumpAllScreens_in() {
+	for _, in := range AllMaps.allScreens_in {
+		in.DumpScreen()
+	}
+}
+
+func (cDump) DumpMapStringUint(name string, ma *map[string]uint16) {
+	trace.Print("map: %s", name)
+	for str, uin := range *ma {
+		trace.Print("-- %04d  '%s'", uin, str)
+	}
+}
+
+func (cDump) DumpAllModels_in() {
+	for _, ie := range AllMaps.allModels_in {
+		ie.DumpModel()
+	}
+}
+
+func (cDump) TraceScreenNames_in() {
+	for _, in := range AllMaps.allScreens_in {
+		trace.Print("-- %s", in.GetName())
+	}
+}
+
+func (cDump) TraceModelNames_in() {
+	for _, in := range AllMaps.allModels_in {
+		trace.Print("-- %s", in.GetName())
+	}
+	trace.Print("map  %#v", AllMaps.mapAllModels_in)
+}
+
+func (cDump) GetModel_in(name string) inAllModels {
+	for _, in := range AllMaps.allModels_in {
+		if in.GetName() == name {
+			return in
+		}
+	}
+	return nil
+}
+
+func (cDump) GetScreen_in(name string) inAllScreens {
+	for _, in := range AllMaps.allScreens_in {
+		if in.GetName() == name {
+			return in
+		}
+	}
+	return nil
+}
+
+func (this *vWindow) TraceWindow() {
+	var modelName string
+	if this.pModel != nil {
+		modelName = this.pModel.name
+	}
+	trace.Print("      window name %-30s (%-20s) · pointers: %12p layer: %12p · margins: %03d %03d %03d %03d",
+		this.name, modelName, this, this.pLayer,
+		this.marginTop, this.marginBottom, this.marginLeft, this.marginRight)
+	// if this.pModel != nil {
+	// 	trace.Print("      window name %s (%s)", this.name, this.pModel.name)
+	// }
+	// trace.Print("        pointers: %p layer: %p", this, this.layer)
+	// trace.Print("        margins: %d %d %d %d",
+	// 	this.marginTop,
+	// 	this.marginBottom,
+	// 	this.marginLeft,
+	// 	this.marginRight)
+}
+
+func (this *mBrowserWsp) TraceIndexes() {
+	trace.BeginAdd_n(this, "TraceIndexes", "len: %d", len(this.wspDbIndexes.sl))
+	for j, i := range this.wspDbIndexes.sl {
+		trace.Print("(%4d) i: %4d  '%-50s' '%-50s' '%s'", j, i, AF.sl[i].genre, AF.sl[i].artist, AF.sl[i].title)
+	}
+	trace.End()
+}
+
+func (this *uFocusKeys) TraceItems() {
+	trace.Print("mapKeyToModel")
+	for k, m := range this.mapKeyToModel {
+		trace.Print("%-5s %s", Input.GetKeyName(k), m.name)
+	}
+	trace.Print("this.items2: %+v", this.itemsTab)
+	trace.Print("this.activeKey: %s", Input.GetKeyName(this.activeKey))
+}
+
+func (this *vScreen) TraceScreen() {
+	trace.Begin_n(this, "TraceScreen")
+	for i := range this.allSections {
+		se := this.allSections[i]
+		se.TraceSection()
+	}
+	// this.manFocusToModel.TraceFocus()
+	trace.End()
+}
+
+func (this *vSection) TraceSection() {
+	trace.Print("  section %-30s [%-12p] · margins: %03d %03d %03d %03d", this.name, this, this.marginTop, this.marginBottom, this.marginLeft, this.marginRight)
+	for i := range len(this.layers) {
+		this.layers[i].TraceLayer()
+	}
+	trace.Print("    frame len %d %d", len(this.frameBold), len(this.frameLight))
+}
+
+func (this *vLayer) TraceLayer() {
+	trace.Print("    layer %-30s [%12p section: %12p]", this.name, this, this.pSection)
+	for i := range len(this.windows) {
+		this.windows[i].TraceWindow()
+	}
+}
+
+func (cDump) DumpKeyboardCommands(commands *[]uCommand) {
+	trace.Print("   (len: %d)", len(*commands))
+	for i := range *commands {
+		cmm := &(*commands)[i]
+		trace.Print("   %-10s %s", Input.GetKeyName(cmm.key), cmm.desc)
+	}
+}
+
+func (cDump) DumpMouseCommands(commands *[]uCommand) {
+	trace.Print("   (len: %d)", len(*commands))
+	for i := range *commands {
+		cmm := &(*commands)[i]
+		trace.Print("   %-10s %s", Input.GetKeyName(cmm.key), cmm.desc)
+	}
+}
+
+func (cDump) TraceDialogButtons() {
+	trace.Print("HelpScreen.dialogButtons:")
+	for _, button := range SettingsDialog.dialogButtons {
+		trace.Print("%+v", button)
+	}
+}
+
+func (cDump) TraceAllFocusButtonsToLayer() {
+	for _, dialog := range AllMaps.allDialogs {
+		trace.Print("%s Section.focusButtonsToLayer:", dialog.name)
+		dump.TraceFocusButtons(&dialog.Section.pScreen.allFocusButtons)
+		// for _, button := range dialog.Section.focusButtonsToLayer {
+		// 	trace.Print("   %+v %s", button, button.layer.name)
+		// }
+	}
+	for _, workspaces := range MainScreen.allWorkspaces {
+		trace.Print("%s:", workspaces.name)
+		for _, section := range workspaces.sections {
+			for _, button := range section.focusButtons {
+				trace.Print("   %+v %s", button, button.layer.name)
+			}
+		}
+	}
+}
+
+func (cDump) TraceFocusButtons(focusButtonsToLayer *[]*vFocusButton) {
+	for _, button := range *focusButtonsToLayer {
+		trace.Print("   %+v, layer: %s", button, button.layer.name)
+	}
+}
+
+func (cDump) TraceAllScreensFocuses() {
+	MainScreen.TraceScreenFocuses()
+	// HelpDialog.TraceScreenFocuses()
+	SettingsDialog.TraceScreenFocuses()
+	FindDialog.TraceScreenFocuses()
+}
+
+func (cDump) TraceTerm() {
+	var tab = "   "
+	trace.Print("-- TraceTerm --")
+	trace.Print("MainScreen.pSectionRight: %s", MainScreen.pRightSection.name)
+	trace.Print("activeScreen: %s", Term.activeScreen.name)
+	if Term.oldActiveScreen != nil {
+		trace.Print("oldActiveScreen: %s", Term.oldActiveScreen.name)
+	}
+	if Term.activeScreen.activeWindow != nil {
+		trace.Print("activeScreen.activeWindow: %s", Term.activeScreen.activeWindow.name)
+		Term.activeScreen.activeWindow.pModel.keys.TraceSelected(tab)
+		Term.activeScreen.activeWindow.lines.TraceSelected(tab)
+	} else {
+		trace.Print("activeScreen.activeWindow: NIL")
+	}
+	trace.Print("activeBrowser: %s", activeBrowser.name)
+	if MainScreen.pRightSection.GetActiveWindow() != nil {
+		trace.Print("Screen.pSectionRight.activeWindow: %s", MainScreen.pRightSection.GetActiveWindow().name)
+		MainScreen.pRightSection.GetActiveWindow().pModel.keys.TraceSelected(tab)
+		MainScreen.pRightSection.GetActiveWindow().lines.TraceSelected(tab)
+	} else {
+		trace.Print("Screen.pSectionRight.activeLayer.activeWindow: NIL")
+	}
+	trace.Print("")
+	trace.Print("")
+}
+
+// TraceModelSelAct this.
+func (this *mBasic) TraceModelSelAct() {
+	tab := "    "
+	trace.Print("  %s", traceStyleBegin.Echo(this.name))
+	this.keys.TraceSelected(tab)
+	this.keys.TraceActive(tab)
+	this.w.lines.TraceSelected(tab)
+}
+
+func (cDump) TraceModelParents(model *mBasic) {
+	trace.Print("-- TraceModelParents for %s --", model.name)
+	var s string
+	///
+	s = "nil"
+	if model.pBrowserWsp != nil {
+		s = model.pBrowserWsp.name
+	}
+	trace.Print("model.pBrowser: %s", s)
+	///
+	s = "nil"
+	if model.w.pLayer == nil {
+		trace.Print("model.w.pLayer: %s", s)
+	} else {
+		s = model.w.pLayer.name
+		trace.Print("model.w.pLayer: %s", s)
+		///
+		s = "nil"
+		if model.w.pLayer.pSection == nil {
+			trace.Print("model.w.pLayer.pSection: %s", s)
+		} else {
+			s = model.w.pLayer.pSection.name
+			trace.Print("model.w.pLayer.pSection: %s", s)
+			///
+			s = "nil"
+			if model.w.pLayer.pSection.pScreen == nil {
+				trace.Print("model.w.pLayer.pSection.pScreen: %s", s)
+			} else {
+				s = model.w.pLayer.pSection.pScreen.name
+				trace.Print("model.w.pLayer.pSection.pScreen: %s", s)
+			}
+		}
+	}
+}
+
+func (this *vMainScreen) TraceActives() {
+	var s string
+	s = "activeSection"
+	if this.activeSection == nil {
+		trace.Print("%s: nil", s)
+	} else {
+		trace.Print("%s: %s", s, this.activeSection.GetLongName())
+		s = "activeSection.actLayer"
+		if this.activeSection.GetActiveLayer() == nil {
+			trace.Print("%s: nil", s)
+		} else {
+			trace.Print("%s: %s", s, this.activeSection.GetActiveLayer().GetLongName())
+			s = "activeSection.actLayer.activeWindow"
+			if this.activeSection.GetActiveLayer().activeWindow == nil {
+				trace.Print("%s: nil", s)
+			} else {
+				trace.Print("%s: %s", s, this.activeSection.GetActiveLayer().activeWindow.GetLongName())
+			}
+		}
+	}
+	s = "activeWindow"
+	if this.activeWindow == nil {
+		trace.Print("%s: nil", s)
+	} else {
+		trace.Print("%s: %s", s, this.activeWindow.GetLongName())
+	}
+}
+
+func (cDump) TraceAllFocuses() {
+	trace.Print("all workspaces focus")
+	for _, wsp := range MainScreen.allWorkspaces {
+		trace.Print("   workspace %s", wsp.name)
+		for s, m := range wsp.focusKeys.mapKeyToModel {
+			trace.Print("      %-5s %s", Input.GetKeyName(s), m.name)
+		}
+	}
+	trace.Print("all dialogs focus")
+	for _, dialog := range AllMaps.allDialogs {
+		trace.Print("   dialog %s", dialog.name)
+		for s, m := range dialog.focusKeys.mapKeyToModel {
+			trace.Print("      %-5s %s", Input.GetKeyName(s), m.name)
+		}
+	}
+}
+
+// .
+func (this *vScreen) TraceScreenFocuses() {
+	trace.Begin_n(this, "TraceScreenFocuses")
+	focus := this.outer.GetFocusMan_o()
+	for key, model := range focus.mapKeyToModel {
+		trace.Print("   key / model:  %6q  %s", Input.GetKeyName(key), model.name)
+	}
+	trace.Print("focus.items")
+	for i := range focus.items {
+		k := &focus.items[i]
+		trace.Print("   %-8s  %s", Input.GetKeyName(k.key), k.name)
+	}
+	trace.Print("focus.items2")
+	for _, k := range focus.itemsTab {
+		trace.Print("   %s", Input.GetKeyName(k))
+	}
+	trace.End()
+}
+
+func (cDump) TraceAndReportError(comment string, doReport bool) {
+	s1 := fmt.Sprintf("Error: %s (%s)", errorBuffer.String(), comment)
+	s1 = strings.ReplaceAll(s1, "\n", "")
+	trace.Error(s1)
+	if doReport {
+		Report.AddErrorLine(s1)
+	}
+	errorBuffer.Reset()
+}
+
+func (this *mBasic) DumpModel() {
+	trace.BeginAdd_n(this, "DumpModel {mBasic}", x__)
+	trace.Print("this.name                  %s", this.name)
+	trace.Print("this.shortName             %s", this.shortName)
+	trace.Print("this.tabCaption            %s", this.tabCaption)
+	trace.Print("this.outer                 %s", GetOuterNilOrName(this.outer))
+	trace.Print("this.focusKey              %s", this.focusKey)
+	this.keys.TraceSelected("")
+	this.keys.TraceActive("")
+	trace.Print("this.iKeyCounter           %d", this.iKeyCounter)
+	trace.Print("this.kCmm ...")
+	dump.DumpKeyboardCommands(&this.kCmm)
+	trace.Print("this.mCmm ...")
+	dump.DumpMouseCommands(&this.mCmm)
+	trace.Print("this.pBrowserWsp           %s", GetNilOrName(this.pBrowserWsp))
+	trace.Print("this.pWorkspace            %s", GetNilOrName(this.pWorkspace))
+	// trace.Print("this.isFocusable           %v", this.isFocusable)
+	trace.Print("this.tableHasChanged       %v", this.tableHasChanged)
+	trace.Print("this.isEmpty               %v", this.isEmpty)
+	trace.Print("this.w.name                %s", this.w.name)
+	trace.Print("this.w.pLayer              %s", GetNilOrName(this.w.pLayer))
+	trace.End()
+}
+
+type cDump struct{}
+
+var dump cDump // namespace
+
+var errorBuffer bytes.Buffer

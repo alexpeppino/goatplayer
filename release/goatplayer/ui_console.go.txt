@@ -1,0 +1,255 @@
+package main
+
+import (
+	"log"
+	"net"
+	"os"
+	"strings"
+)
+
+func (this *uRemote) InitRemote() {
+	this.fd = trace.fd
+	this.mapCmm = make(map[string]*uRemoteCmm)
+	this.cmm = append(this.cmm,
+		uRemoteCmm{"h", "print list of commands", func() {
+			for _, cmm := range RemConsole.cmm {
+				trace.Print("%-20s--> %s", cmm.key, cmm.line)
+			}
+			trace.Print("%-20s--> %s", "x", "repeat last command")
+		}},
+		uRemoteCmm{"lm", "list of models", func() {
+			trace.PrintNoTab("Tables: ")
+			for t, m := range AllMaps.mapBasicModels {
+				trace.PrintNoTab("- %-20s %s", t, m.name)
+			}
+		}},
+		uRemoteCmm{"lws", "print list of workspaces", func() {
+			trace.PrintNoTab("Workspaces: %s  %+v", GetLongNames(MainScreen.allWorkspaces), MainScreen.mapWorkspaces)
+		}},
+		uRemoteCmm{"pm", "print model -- usage: pm MODEL_NAME", func() {
+			if len(RemConsole.rmArgs) == 1 {
+				return
+			}
+			if pModel, ok := AllMaps.mapBasicModels[RemConsole.rmArgs[1]]; ok {
+				trace.Print("Model: %s", pModel.name)
+				trace.PrintIndentedV(pModel)
+				// pModel.TraceModel()	// pModel.keys.TraceAll()	// pModel.w.lines.TraceAll()
+			}
+		}},
+
+		uRemoteCmm{"fl", "print filelists", func() {
+			trace.Print(GetLongNames(AllMaps.allAbstractFilelists))
+			trace.Print("%+v", AllMaps.mapBasicFilelists)
+		}},
+		uRemoteCmm{"fli", "trace filelist indexes -- usage: fli MODEL_NAME", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			if filelist, ok := AllMaps.mapBasicFilelists[RemConsole.rmArgs[1]]; ok {
+				trace.Print("name: %s, len: %d", filelist.name, len(filelist.dbIndexes.sl))
+				var j uint16
+				for _, index := range filelist.dbIndexes.sl {
+					trace.Print("%4d %4d  %s", j, index, AF.sl[index].title)
+					j++
+				}
+			}
+		}},
+
+		uRemoteCmm{"sc", "trace all screens and dialogs", func() {
+			MainScreen.TraceScreen()
+			// for t := range AllMaps.mapContainers {
+			// 	AllMaps.mapContainers[t].TraceModelSelAct()
+			// }
+			// for t := range AllMaps.mapFilelists {
+			// 	AllMaps.mapFilelists[t].Trace()
+			// }
+			// HelpDialog.TraceScreen()
+			SettingsDialog.TraceScreen()
+		}},
+		uRemoteCmm{"ui_pl", "print ui_pl", func() { trace.PrintNoTab("%+v\n", ui_pl) }},
+		uRemoteCmm{"all", "all models", func() {
+			for t := range AllMaps.mapBasicModels {
+				trace.PrintNoTab("%s", t)
+				trace.PrintNoTab("%+v\n", AllMaps.mapBasicModels[t].keys)
+			}
+		}},
+		uRemoteCmm{"set", "trace settings", Set.TraceSettings},
+		uRemoteCmm{"save-af", "save audiofiles to file", AF.SaveDataToFile},
+		uRemoteCmm{"read-af", "read audiofiles from file", AF.LoadDataFromFile},
+		uRemoteCmm{"save-dirs", "save music dirs to file", MusicScanner.WriteDirsToFile},
+		uRemoteCmm{"save-filelist", "save music filelist to file", MusicScanner.WriteFilelistToFile},
+		uRemoteCmm{"compare", "compare audiofiles-db and music-dir", AF.Compare},
+		uRemoteCmm{"write-pflist", "", PFListsData.SaveDataToFile},
+		uRemoteCmm{"read-pflist", "", PFListsData.LoadDataFromFile},
+		// uRemoteCmm{"query", "", this.rmQuery},
+		// uRemoteCmm{"query2", "", this.rmQuery2},
+		uRemoteCmm{"mar", "highlight margins", MainScreen.HighlightMargins},
+		uRemoteCmm{"hi", "highlight point", func() {
+			if len(RemConsole.rmArgs) < 3 {
+				return
+			}
+			iRow := utils.str2uint(RemConsole.rmArgs[1])
+			iCol := utils.str2uint(RemConsole.rmArgs[2])
+			trace.Print("rmPrintPoint: %d %d", iRow, iCol)
+			MainScreen.HighlightPoint(iRow, iCol)
+		}},
+		// uRemoteCmm{"start-monitor", "start monitor", this.rmStartMonitor},
+		// uRemoteCmm{"stop-monitor", "stop monitor", this.rmStopMonitor},
+		uRemoteCmm{"term", "get term size", Term.GetTermSize},
+		uRemoteCmm{"prec", "Toggle PrecFuncs", func() {
+			trace.tracePrecs = !trace.tracePrecs
+			trace.Print("trace.tracePrecs: %v", trace.tracePrecs)
+		}},
+		uRemoteCmm{"pa", "usage: pa MODEL_NAME - Trace model parents", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			m := AllMaps.mapBasicModels[RemConsole.rmArgs[1]]
+			dump.TraceModelParents(m)
+		}},
+		uRemoteCmm{"fms", "TraceMainScreenFocus", MainScreen.TraceScreenFocuses},
+		uRemoteCmm{"fa", "TraceAllScreensFocuses", dump.TraceAllScreensFocuses},
+		uRemoteCmm{"db", "Trace Dialog Buttons", dump.TraceDialogButtons},
+		uRemoteCmm{"fb", "Trace FocusButtonsToLayer", dump.TraceAllFocusButtonsToLayer},
+		uRemoteCmm{"dm", "dump model -- use: dm MODEL_NAME", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			if m, ok := AllMaps.mapBasicModels[RemConsole.rmArgs[1]]; ok {
+				m.DumpModel()
+			} else {
+				trace.Print("<invalid model>")
+			}
+		}},
+		uRemoteCmm{"dws", "dump workspace -- usage: dws WSP_NAME", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			if wsp, ok := MainScreen.mapWorkspaces[RemConsole.rmArgs[1]]; ok {
+				wsp.outer.Dump_o()
+			} else {
+				trace.Print("<invalid workspace>")
+			}
+		}},
+		uRemoteCmm{"dt", "dump term", Term.Dump},
+		uRemoteCmm{"dms", "dump mainscreen", MainScreen.Dump_o},
+		uRemoteCmm{"-list-screens", "", dump.TraceScreenNames_in},
+		uRemoteCmm{"-draw-rect", "", DrawRect},
+		uRemoteCmm{"-list-models", "", dump.TraceModelNames_in},
+		uRemoteCmm{"-dump-screen", "", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			name := RemConsole.rmArgs[1]
+			trace.Print("screen: %s", name)
+			m := dump.GetScreen_in(name)
+			if m != nil {
+				m.DumpScreen()
+			} else {
+				trace.Print("<invalid name>")
+			}
+		}},
+		uRemoteCmm{"-dump-model", "", func() {
+			if len(RemConsole.rmArgs) < 2 {
+				return
+			}
+			name := RemConsole.rmArgs[1]
+			trace.Print("model: %s", name)
+			m := dump.GetModel_in(name)
+			if m != nil {
+				m.DumpModel()
+			} else {
+				trace.Print("<invalid name>")
+			}
+		}},
+		uRemoteCmm{"tt", "trace term", dump.TraceTerm})
+	for _, cmm := range this.cmm {
+		this.mapCmm[cmm.key] = &cmm
+	}
+}
+
+// func (this *uRemote) Query() {
+// 	f1 := func(audiof *aAudiofile, i uint16) bool {
+// 		return audiof.genre == "Rock"
+// 	}
+// 	f2 := func(audiof *aAudiofile, i uint16) bool {
+// 		return audiof.artist == "Neil Young"
+// 	}
+// 	le := len(AF.sl)
+// 	var dbIndexis = make([]uint16, le)
+// 	for i := range le {
+// 		dbIndexis[i] = AF.sl[i].dbIndex
+// 	}
+// 	trace.Print("%v", dbIndexis)
+// 	AF.QueryRel(&dbIndexis, f1)
+// 	AF.QueryRel(&dbIndexis, f2)
+// 	trace.Print("%d\n%v", len(dbIndexis), dbIndexis)
+// 	for _, iDb := range dbIndexis {
+// 		audiof := AF.GetAudiof(iDb)
+// 		trace.Print("%d  %s", iDb, audiof.title)
+// 	}
+// }
+
+func RemoteInterface_go() {
+	trace.GoPrint(">>>> RemoteInterface START")
+	var send string
+	// Create a Unix domain socket and listen for incoming connections.
+	os.Remove("/tmp/echo.sock")
+	socket, err := net.Listen("unix", "/tmp/echo.sock")
+	if err != nil {
+		trace.Error("%v", err)
+		log.Print(err)
+		return
+	}
+	// rmPrintCommandList()
+	for {
+		/// Accept an incoming connection.
+		conn, err := socket.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+		/// Create a buffer for incoming data.
+		buf := make([]byte, 4096)
+		// Read data from the connection.
+		trace.GoPrint(">>>> RemoteInterface READ")
+		n, err := conn.Read(buf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		s := string(buf[:n-1])
+		if s != "x" {
+			RemConsole.rmArgs = strings.Split(s, " ")
+		}
+		trace.GoPrint(">>>> RemoteInterface ExecCommand: %v", RemConsole.rmArgs)
+		if cmm, ok := RemConsole.mapCmm[RemConsole.rmArgs[0]]; ok {
+			send = ""
+			cmm.f()
+		} else {
+			trace.GoPrint(">>>> RemoteInterface invalid command")
+		}
+		bs := []byte(send + "\n")
+		/// Echo the data back to the connection.
+		// s := []byte("come stai?\n")
+		_, err = conn.Write(bs)
+		// _, err = conn.Write(buf[:n])
+		if err != nil {
+			trace.GoPrint(">>>> error writing to pipe, %v", err)
+		}
+		conn.Close()
+	}
+}
+
+type uRemote struct {
+	in_str string
+	in_int int
+	rmArgs []string
+	cmm    []uRemoteCmm
+	mapCmm map[string]*uRemoteCmm
+	fd     *os.File
+}
+
+type uRemoteCmm struct {
+	key  string
+	line string
+	f    func()
+}

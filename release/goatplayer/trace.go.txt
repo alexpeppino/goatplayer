@@ -1,0 +1,476 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+func (this *cTrace) InitTrace(fd, fdErr *os.File) {
+	this.tracePrecs = false
+	this.fd = fd
+	this.fdErr = fdErr
+	this.level = 0
+	this.levelItems[0].tab = ""
+	this.levelItems[1].tab = "1  "
+	this.levelItems[2].tab = " 2    "
+	this.levelItems[3].tab = "  3      "
+	this.levelItems[4].tab = "   4        "
+	this.levelItems[5].tab = "    5          "
+	this.levelItems[6].tab = "     6            "
+	this.levelItems[7].tab = "      7              "
+	this.levelItems[8].tab = "       8                "
+	this.levelItems[9].tab = "        9                  "
+	this.levelItems[10].tab = "         10                   "
+	this.levelItems[11].tab = "          11                     "
+	this.levelItems[12].tab = "           11                       "
+	this.levelItems[13].tab = "            13                         "
+	this.levelItems[14].tab = "             14                           "
+	this.levelItems[15].tab = "              15                             "
+	this.levelItems[16].tab = "               16                               "
+	this.levelItems[17].tab = "                17                                 "
+	this.levelItems[18].tab = "                 18                                   "
+	this.levelItems[19].tab = "                  19                                     "
+	fmt.Fprint(this.fd, Pen.Normal+"\n\n\n\n")
+}
+
+///
+
+func (this *cTrace) Begin(funcName string) {
+	this._begin(&funcName, false)
+}
+
+func (this *cTrace) getActiveLevelItem() *tTraceLevelItem {
+	return &this.levelItems[this.level]
+}
+
+func (this *cTrace) BeginSilent(funcName string) {
+	this._levelPlus()
+	this.getActiveLevelItem().isSilent = true
+	this.getActiveLevelItem().funcName = funcName
+}
+
+func (this *cTrace) BeginSilent_n(t iTrace, funcName string) {
+	var s string
+	this._levelPlus()
+	this.longName(t, &funcName, &s)
+	this.getActiveLevelItem().isSilent = true
+	this.getActiveLevelItem().funcName = s
+}
+
+func (this *cTrace) BeginAdd(funcName string, format string, a ...any) {
+	this.AddToPrintPlus1(format, a...)
+	this._begin(&funcName, true)
+}
+
+func (this *cTrace) BeginAdd_n(t iTrace, funcName string, format string, a ...any) {
+	var s string
+	this.longName(t, &funcName, &s)
+	this.AddToPrintPlus1(format, a...)
+	this._begin(&s, true)
+}
+
+func (this *cTrace) Begin_n(t iTrace, funcName string) {
+	var s string
+	this.longName(t, &funcName, &s)
+	this._begin(&s, false)
+}
+
+func (this *cTrace) BeginPrintAll_n(t iTrace, funcName string) {
+	var s string
+	this.longName(t, &funcName, &s)
+	this._begin(&s, true)
+}
+
+///
+
+func (this *cTrace) End() {
+	this._end()
+}
+
+func (this *cTrace) EndAdd(format string, a ...any) {
+	this.AddToPrint(format, a...)
+	this._end()
+	// fo := fmt.Sprintf("<< %s\n", format)
+	// fmt.Fprintf(this.fd, this.tabs[this.level]+traceStyleEnd.Echo(fo), a...)
+	// this.LevelMinus()
+}
+
+///
+
+func (this *cTrace) longName(t iTrace, funcName, s *string) {
+	*s = t.GetLongName() + "." + *funcName
+}
+
+func (this *cTrace) tab() string {
+	return this.getActiveLevelItem().tab
+}
+
+// func (this *cTrace) N_BeginPrintAll_prec(t iTrace, funcName string) {
+// 	this._levelPlus_prec()
+// 	this.funcNames[this.level] = t.GetLongName() + "." + funcName
+// 	fo := fmt.Sprintf(">> %s.%s", t.GetLongName(), funcName)
+// 	fmt.Fprint(this.fd, this.tabs[this.level]+traceStyleBegin.Echo(fo))
+// 	fmt.Fprintf(this.fd, "%s %s", this.content, this.precFuncNames)
+// 	this.content = ""
+// }
+
+///
+
+func (this *cTrace) BeginEnd(funcName string) {
+	this._beginEnd(&funcName)
+}
+
+func (this *cTrace) BeginEndAdd(funcName string, format string, a ...any) {
+	this.AddToPrintPlus1(format, a...)
+	this._beginEnd(&funcName)
+}
+
+func (this *cTrace) BeginEnd_n(t iTrace, funcName string) {
+	var s string
+	this.longName(t, &funcName, &s)
+	this._beginEnd(&s)
+}
+
+func (this *cTrace) BeginEndAdd_n(t iTrace, funcName string, format string, a ...any) {
+	this.AddToPrintPlus1(format, a...)
+	var s string
+	this.longName(t, &funcName, &s)
+	this._beginEnd(&s)
+}
+
+// func (this *cTrace) BeginEndPrintAll_n(t iTrace, format string, a ...any) {
+// 	this.levelPlus()
+// 	fo := fmt.Sprintf("<> %s.%s", t.GetLongName(), format)
+// 	fmt.Fprintf(this.fd, this.tabs[this.level]+traceStyleBegin.Echo(fo), a...)
+// 	fmt.Fprintf(this.fd, "%s\n", this.content)
+// 	this.levelMinus()
+// 	this.content[this.level] = ""
+// }
+
+// func (this *cTrace) BeginEndPrintAll(format string, a ...any) {
+// 	this.levelPlus()
+// 	fo := fmt.Sprintf("<> %s", format)
+// 	fmt.Fprintf(this.fd, this.tabs[this.level]+traceStyleBegin.Echo(fo), a...)
+// 	fmt.Fprintf(this.fd, "%s\n", this.content)
+// 	this.levelMinus()
+// 	this.content[this.level] = ""
+// }
+
+///
+
+func (this *cTrace) _begin(name *string, printAll bool) {
+	this._levelPlus()
+	this.getActiveLevelItem().funcName = *name
+	var content, precFuncNames string
+	if printAll {
+		this.getContent(&content)
+	}
+	if this.tracePrecs {
+		this.preparePrec(&precFuncNames)
+	}
+	fmt.Fprintf(this.fd, "%s>> %s%s %s\n", this.tab(), traceStyleBegin.Echo(*name), content, precFuncNames)
+}
+
+func (this *cTrace) getContent(s *string) {
+	active := this.getActiveLevelItem()
+	*s = active.content
+	active.content = ""
+}
+
+func (this *cTrace) _beginEnd(name *string) {
+	this._levelPlus()
+	// this.funcNames[this.level] = *name
+	var content, precFuncNames string
+	this.getContent(&content)
+	// this.getContent(&content)
+	if this.tracePrecs {
+		this.preparePrec(&precFuncNames)
+	}
+	fmt.Fprintf(this.fd, "%s<> %s%s %s\n", this.tab(), traceStyleBegin.Echo(*name), content, precFuncNames)
+	this._levelMinus()
+}
+
+func (this *cTrace) _end() {
+	var content, s string
+	var style *cTraceStyle
+	active := this.getActiveLevelItem()
+	this.getContent(&content)
+	if active.isSilent {
+		s = "<>"
+		style = &traceStyleBegin
+		active.isSilent = false
+	} else {
+		s = "<<"
+		style = &traceStyleEnd
+	}
+	fmt.Fprintf(this.fd, "%s%s %s%s\n", this.tab(), s, style.Echo(active.funcName), content)
+	this._levelMinus()
+}
+
+///
+
+func (this *cTrace) _return() {
+	var content, s string
+	var style *cTraceStyle
+	active := this.getActiveLevelItem()
+	this.getContent(&content)
+	if active.isSilent {
+		s = "<>"
+		style = &traceStyleBegin
+		active.isSilent = false
+	} else {
+		s = "<<"
+		style = &traceStyleEnd
+	}
+	fmt.Fprintf(this.fd, "%s%s return %s%s\n", this.tab(), s, style.Echo(active.funcName), content)
+	this._levelMinus()
+}
+
+func (this *cTrace) ReturnAdd(format string, a ...any) {
+	this.AddToPrint(format, a...)
+	this._return()
+}
+
+func (this *cTrace) Return() {
+	this._return()
+}
+
+///
+
+func (this *cTrace) AddToPrint(format string, a ...any) {
+	this.getActiveLevelItem().content += fmt.Sprintf(" · "+format, a...)
+}
+
+func (this *cTrace) AddToPrintPlus1(format string, a ...any) {
+	var level = this.level + 1
+	if level >= len(this.levelItems) {
+		level--
+	}
+	this.levelItems[level].content += fmt.Sprintf(" · "+format, a...)
+}
+
+func (this *cTrace) Print(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleNormal.Echo(this.tab()+"   "+format+"\n"), a...)
+}
+
+func (this *cTrace) PrintWithName(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleNormal.Echo(this.tab()+"   "+format), a...)
+	fmt.Fprintf(this.fd, "  (%s)\n", this.getActiveLevelItem().funcName)
+}
+
+func (this *cTrace) PrintFocus(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleFocus.Echo(this.tab()+"   "+format+"\n"), a...)
+}
+
+func (this *cTrace) PrintGreen(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleGreen.Echo(this.tab()+"   "+format+"\n"), a...)
+}
+
+func (this *cTrace) PrintNoTab(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleNormal.Echo(format+"\n"), a...)
+}
+
+func (this *cTrace) GoPrint(format string, a ...any) {
+	fmt.Fprintf(this.fd, traceStyleError.Echo(format+"\n"), a...)
+}
+
+func (this *cTrace) Player(format string, a ...any) {
+	fmt.Fprintf(this.fd,
+		traceStylePlayer.Echo("PLAYER: "+format+"\n"),
+		a...)
+}
+
+///
+
+func (this *cTrace) Error_n(t iTrace, format string, a ...any) {
+	fo := fmt.Sprintf("%s!! %s.%s\n",
+		this.getActiveLevelItem().tab,
+		t.GetLongName(),
+		format)
+	fmt.Fprintf(this.fd, traceStyleError.Echo(fo), a...)
+}
+
+func (this *cTrace) Error(format string, a ...any) {
+	fo := fmt.Sprintf("%s!! %s\n",
+		this.getActiveLevelItem().tab,
+		format)
+	fo2 := fmt.Sprintf("%s\n", format)
+	fmt.Fprintf(this.fd, traceStyleError.Echo(fo), a...)
+	var precs string
+	this.preparePrec2(&precs)
+	fmt.Fprintln(this.fdErr, precs)
+	fmt.Fprintf(this.fdErr, fo2, a...)
+	fmt.Fprintln(this.fdErr)
+}
+
+func (this *cTrace) Err(err error) {
+	fmt.Fprintf(this.fd, "err: %v\n", err)
+}
+
+///
+
+// Give a slice of iTrace, get list of names.
+func GetLongNames[T iTrace](names []T) string {
+	var s string
+	for _, name := range names {
+		s += name.GetLongName() + ", "
+	}
+	return s
+}
+
+func TraceNameAndInterfaceFromMap[T iTrace](ma map[string]T) {
+	for name, iface := range ma {
+		trace.Print("   %-20s %s", name, iface.GetLongName())
+	}
+}
+
+// Prints an indented "%#v".
+func (this *cTrace) PrintIndentedV(a ...any) {
+	var v string
+	var level int
+	var tab = "    "
+	var Tabs = func() string {
+		return strings.Repeat(tab, level)
+	}
+	// var TabsMinus = func() string {
+	// 	if level > 0 {
+	// 		level--
+	// 	}
+	// 	return strings.Repeat(tab, level)
+	// }
+	for i := range a {
+		aa := a[i]
+		v += fmt.Sprintf("---- %#v\n", aa)
+	}
+	// v = strings.ReplaceAll(v, ", ", ",\n    ")
+	v = strings.ReplaceAll(v, "{", "{\n\t")
+	v = strings.ReplaceAll(v, "}", "}\n\t")
+	v = strings.ReplaceAll(v, ", ", ",\n\t")
+	// v = strings.ReplaceAll(v, "nil", DC_BOLD+"<NIL>"+DC_RESET+traceStyleNormal.JustTheColor())
+	v = strings.ReplaceAll(v, "nil", traceStyleNormal.Bold("<NIL>"))
+	vv := strings.Split(v, "\t")
+	for _, v := range vv {
+		fmt.Fprint(this.fd, traceStyleNormal.Echo(Tabs()+v))
+		if strings.HasSuffix(v, "{\n") {
+			level++
+		} else if strings.HasSuffix(v, "}\n") {
+			level--
+		}
+	}
+	fmt.Println()
+}
+
+func (this *cTrace) _levelPlus() {
+	this.level++
+	if this.level >= len(this.levelItems) {
+		this.level = len(this.levelItems) - 1
+	}
+}
+
+func (this *cTrace) preparePrec(precFuncNames *string) {
+	*precFuncNames = "("
+	for i := range this.level {
+		*precFuncNames += this.levelItems[i].funcName + " >> "
+	}
+	*precFuncNames += ")"
+	*precFuncNames = DC_RESET + traceStyleNormal.Echo(*precFuncNames)
+}
+
+func (this *cTrace) preparePrec2(precFuncNames *string) {
+	for i := range this.level {
+		*precFuncNames += this.levelItems[i+1].funcName + " >> "
+	}
+}
+
+func (this *cTrace) _levelMinus() {
+	this.level--
+	if this.level < 0 {
+		this.level = 0
+		trace.Error("TRACE --- level < 1")
+	}
+}
+
+func (this *cTrace) PrintLinchpins() {}
+
+type tTraceLevelItem struct {
+	tab      string
+	funcName string
+	content  string
+	isSilent bool
+}
+
+type cTrace struct {
+	fd            *os.File
+	fdErr         *os.File
+	level         int
+	levelItems    [20]tTraceLevelItem
+	precFuncNames string
+	tracePrecs    bool
+	iLine         uint16
+}
+
+type iTrace interface {
+	GetLongName() (name string)
+}
+
+type iGetName interface {
+	GetName() string
+}
+
+func GetOuterNilOrName(outer iGetName) string {
+	if outer == nil {
+		return "<nil>"
+	} else {
+		return outer.GetName()
+	}
+}
+
+func GetNilOrName(a any) string {
+	s := "<nil>"
+	switch aa := a.(type) {
+	case *vMainScreen:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *maWorkspace:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *mBrowserWsp:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *vSection:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *vLayer:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *vScreen:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	case *vWindow:
+		if aa == nil {
+			return s
+		} else {
+			return aa.name
+		}
+	}
+	return "<invalid type>"
+}
