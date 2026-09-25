@@ -9,3 +9,7 @@ Required commands:
 
 - mpv
 - socat
+
+Static libraries required to build from source:
+
+- libtag
