@@ -1,5 +1,7 @@
 # GoatPlayer
 
+![Browser2](https://github.com/alexpeppino/goatplayer/blob/main/z/goatplayer-002.png)
+
 GoatPlayer is a music library's manager and audiofiles player.
 It is written in Go.
 It works in the gnome-terminal.
@@ -20,7 +22,7 @@ Install libtag:
 This is a new project. Any help and collaboration will be welcome.
 Download and try it out if you want to help me with its development.
 
-All this thing started in February 2026 as a bash script. I did like using mpv from the command line, so I started writing a bash script to manage playlists. After some time I decided that bash was not good for this project; I looked aroung and choose the Go language. I like Go and I think it has been a good choice. 
+All this thing started in February 2026 as a bash script. I did like using mpv from the command line, so I started writing a bash script to manage playlists. After some time I decided that bash was not good for this project; I looked around and choose the Go language. I like Go and I think it has been a good choice. 
 
 I use:
 
@@ -41,9 +43,7 @@ In this directory there is the source code of the release version (no logging).
 
 ## develop
 
-In this directory there is the source code of the development (debug) version. 
-
-s(It prints a colorful and detailed logfile I can watch in another terminal using `tail -F`. I removed this from the release version.)
+In this directory there is the source code of the development (debug) version. (It prints a colorful and detailed logfile that I can watch in another terminal using `tail -F`. I removed this from the release version.)
 
 ## install
 
