@@ -2,9 +2,9 @@
 
 ![Browser2](https://github.com/alexpeppino/goatplayer/blob/main/z/goatplayer-002.png)
 
-GoatPlayer is a music library's manager and audiofiles player.
+GoatPlayer is a newborn project for a music library's manager and audiofiles player in the terminal.
 It is written in Go.
-It works in the gnome-terminal.
+It works well in the gnome-terminal.
 It uses mpv as a backend (via socket)
 
 GOAT = Go + Audiofiles + Terminal
