@@ -1,6 +1,6 @@
 # GoatPlayer
 
-![Browser2](https://github.com/alexpeppino/goatplayer/blob/main/z/goatplayer-002.png)
+![Browser2](https://github.com/alexpeppino/goatplayer/blob/main/images/goatplayer-002.png)
 
 GoatPlayer is a newborn project for a music library's manager and audiofiles player in the terminal.
 It is written in Go.
