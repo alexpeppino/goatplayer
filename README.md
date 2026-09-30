@@ -56,8 +56,6 @@ In the Wiki you will find a documentation about the usage and the software.
 
 <https://www.youtube.com/watch?v=sX3vjuGuzKY&t=20s>
 
-<https://www.youtube.com/watch?v=mR0dqhsBw1I&t=7s>
-
 ## Go packages used
 
 - github.com/dhowden/tag
